@@ -1,0 +1,31 @@
+{
+    "plugins": [
+        "mobi.monaca.plugins.Monaca"
+    ],
+    "framework_version": "3.5",
+    "xcode_version": null,
+    "cordova_version": "5.2",
+    "plugin_settings": {
+        "ncmb-push-monaca-plugin": {
+            "variables": []
+        }
+    },
+    "external_plugins": [
+        "cordova-plugin-whitelist@1.0.0",
+        "cordova-plugin-splashscreen@2.1.0",
+        "cordova-plugin-dialogs@1.1.1",
+        "cordova-plugin-vibration@1.2.0",
+        "cordova-plugin-inappbrowser@1.0.1",
+        "ncmb-push-monaca-plugin@2.0.2"
+    ],
+    "title-ja": "ペアリング通知",
+    "title-en": "",
+    "description-ja": "1102バックアップ",
+    "description-en": "",
+    "category": "User Template",
+    "platform": [
+        "android",
+        "ios"
+    ],
+    "name": "generated-1478061482-57a9d6377e2193054a607c7b"
+}

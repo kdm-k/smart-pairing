@@ -1,0 +1,312 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <meta name="format-detection" content="telephone=no">
+    <script src="components/loader.js"></script>
+    <script src="lib/onsenui/js/onsenui.min.js"></script>
+
+    <link rel="stylesheet" href="components/loader.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script>
+    
+    var ncmb = new NCMB("51a05738bc3604206fc598089cfdde598177847dff3cfb4cae871ff81d7d99cd",
+                    "2213a770c40b3b1254edafb29391eb04a5f3313f63494f6e3fec685fddd99f2b");
+    
+        ons.ready(function() {
+            
+            var navigator = document.getElementById('navigator');
+
+            ons.createAlertDialog('alert.html');
+            
+            $(document).on('click','#pairing-button',function() {
+                window.open("http://www.hareruyamtg.com/onlinepairing/", "_system");
+            });
+            $(document).on('click','#push-button',function() {
+                window.NCMB.monaca.getInstallationId(function(id) {
+                    if (id) {
+                        ncmb.Installation.fetchById(id)
+                            .then(function(installation){
+                                $('.tournament .pushListText').text(installation.get("tournamentName"));
+                                $('.round .pushListText').text(installation.get("round"));
+                                $('.table .pushListText').text(installation.get("tableNumber"));
+                                $('.match_p .pushListText').text(installation.get("matchPoint"));
+                                $('.opponent_name .pushListText').text(installation.get("opponentName"));
+                                $('.opponent_point .pushListText').text(installation.get("opponentMatch"));
+                                $('.posted_time .pushListText').text(installation.get("postedTime"));
+                            });
+                    }
+                });
+                navigator.pushPage('push.html');
+            });
+            $(document).on('click','#dci-button',function() {
+                navigator.addEventListener('postpush', function(event) {
+                    var messageNumber = localStorage.getItem("dciNumber");
+                    if(messageNumber){
+                        $("#dciMessage").text("DCI Number : "+ (messageNumber));
+                    }
+                });
+                navigator.pushPage('dci.html');
+            });
+            
+            $(document).on('click','#test',function() {
+                
+                navigator.pushPage('test');
+            });
+            
+            
+            $(document).on('click','#dciSubmit',function(){
+                $(".cover").show();
+                var successCallback = function () {
+                    window.NCMB.monaca.getInstallationId(function(id) {
+                        if (id) {
+                            ncmb.Installation.fetchById(id)
+                                    .then(function(installation){
+                                        installation.set("DCI", $("#dci").val());
+                                        return installation.update();
+                                    })
+                                    .then(function(val){
+                                        localStorage.setItem("dciNumber",$("#dci").val());
+                                        $("#dciMessage").text("DCI Number:"+$("#dci").val());
+                                        ons.notification.alert({message: 'Success!', title: '', buttonLabel: 'OK', animation: 'default'});
+                                        $(".cover").hide();
+                                    })
+                                    .catch(function(err){
+                                        ons.notification.alert({message: 'Failed...', title: '', buttonLabel: 'OK', animation: 'default'});
+                                        $(".cover").hide();
+                                    });
+                        }
+                    });
+                };
+                
+                var errorCallback = function (err) {
+                    console.log(err);
+                    ons.notification.alert({message: 'Error #1 occured.', title: 'Smart Pairing', buttonLabel: 'OK', animation: 'default'});
+                    $(".cover").hide();
+                };
+
+                
+
+                // デバイストークンを取得してinstallation登録が行われます
+                // ※ aplication_key,client_keyはニフティクラウドmobile backendから発行されたkeyに置き換えてください
+                // ※ sender_idは【GCMとの連携に必要な準備】で作成したProjectのProject Numberを入力してください
+                //旧sender id:192313345356
+                window.NCMB.monaca.setDeviceToken(
+                    "51a05738bc3604206fc598089cfdde598177847dff3cfb4cae871ff81d7d99cd",
+                    "2213a770c40b3b1254edafb29391eb04a5f3313f63494f6e3fec685fddd99f2b",
+                    "1000768125446",
+                    successCallback,
+                    errorCallback
+                );
+                
+                
+            });
+            
+            //1.0.5 初期起動時のアラートと画面遷移（DCIの登録がなければ出る）
+            setTimeout(function(){
+                if(!localStorage.getItem("dciNumber")){
+                    ons.notification.alert({message: 'Input your DCI Number!', title: '', buttonLabel: 'OK', animation: 'default', callback:function(){navigator.pushPage('dci.html');} });
+                }
+
+                // プッシュ通知受信時のコールバックを登録します
+
+                
+            },500)
+
+            
+        });
+    
+        //以下プッシュ通知受信で使用
+        
+        ons.ready(function(){
+            
+            
+                // プッシュ通知受信時のコールバックを登録します
+                window.NCMB.monaca.setHandler(function(){
+                        var target = document.getElementById('navigator');
+                      
+                        window.NCMB.monaca.getInstallationId(function(id) {
+                            if (id) {
+                                ncmb.Installation.fetchById(id)
+                                    .then(function(installation){
+                                        $('.tournament .pushListText').text(installation.get("tournamentName"));
+                                        $('.round .pushListText').text(installation.get("round"));
+                                        $('.table .pushListText').text(installation.get("tableNumber"));
+                                        $('.match_p .pushListText').text(installation.get("matchPoint"));
+                                        $('.opponent_name .pushListText').text(installation.get("opponentName"));
+                                        $('.opponent_point .pushListText').text(installation.get("opponentMatch"));
+                                        $('.posted_time .pushListText').text(installation.get("postedTime"));
+                                    });
+                            }
+                        });
+                        
+                        target.pushPage('push.html');
+                    }
+                );
+                
+                
+                
+
+                // 開封通知登録の設定
+                // trueを設定すると、開封通知を行う
+            window.NCMB.monaca.setReceiptStatus(true);
+
+        },false);
+            
+       
+        
+
+
+         
+    </script>
+
+    <script type="text/ons-template" id="alert.html">
+            <ons-alert-dialog animation="default" cancelable>
+            <div class="alert-dialog-title">
+                Smart Pairing
+            </div>
+            <div class="alert-dialog-content">
+              An error has occurred!
+            </div>
+            <div class="alert-dialog-footer">
+              <button class="alert-dialog-button">OK</button>
+            </div>
+      </ons-alert-dialog>
+    </script>
+
+
+</head>
+<body>
+    
+
+    <ons-navigator id="navigator" page="page1.html">
+    </ons-navigator>
+    
+    <ons-tabbar>
+      <ons-tab label="Tab 1" page="page1.html" active>
+      </ons-tab>
+      <ons-tab label="Tab 2" page="push.html">
+      </ons-tab>
+      <ons-tab label="Tab 3" page="test">
+      </ons-tab>
+    </ons-tabbar>
+    
+    
+    <ons-template id="page1.html">
+      <ons-page>
+        <ons-toolbar>
+          <div class="center">Smart Pairing</div>
+        </ons-toolbar>
+        
+        <!-- 本文 -->
+        <div class="wrapper">
+            <ul class="mainList">
+                <!--<li onclick="window.open('http://www.hareruyamtg.com/onlinepairing/','_system','location:yes');">-->
+                <li id="push-button">
+                    <ons-ripple color="#aaa" background="#ccc"></ons-ripple>
+                    <p>Your Latest Pairing</p>
+                </li>
+                <li id="pairing-button">
+                    <ons-ripple color="#aaa" background="#ccc"></ons-ripple>
+                    <p>Online Pairing</p>
+                </li>
+                <li id="dci-button">
+                    <ons-ripple color="#aaa" background="#ccc"></ons-ripple>
+                    <p>DCI Number Registration</p>
+                </li>
+                <li id="test">
+                    <ons-ripple color="#aaa" background="#ccc"></ons-ripple>
+                    <p>test</p>
+                </li>
+            </ul>
+        </div>
+      </ons-page>
+    </ons-template>
+
+    <ons-template id="push.html">
+      <ons-page>
+        <ons-toolbar>
+          <div class="left"><ons-back-button>Back</ons-back-button></div>
+          <div class="center">Push Notifications</div>
+        </ons-toolbar>
+
+        <div class="wrapper">
+            <ul class="pushList">
+                <li class="tournament">
+                    <h2 class="pushListHead">Tournament</h2>
+                    <p class="pushListText"></p>
+                </li>
+                <li class="round">
+                    <h2 class="pushListHead">Round</h2>
+                    <p class="pushListText"></p>
+                </li>
+                <li class="table">
+                    <h2 class="pushListHead">Table Number</h2>
+                    <p class="pushListText"> </p>
+                </li>
+                <li class="match_p">
+                    <h2 class="pushListHead">Match Points</h2>
+                    <p class="pushListText"></p>
+                </li>
+                <li class="opponent_name">
+                    <h2 class="pushListHead">Opponent's Name</h2>
+                    <p class="pushListText"></p>
+                </li>
+                <li class="opponent_point">
+                    <h2 class="pushListHead">Opponent's Points</h2>
+                    <p class="pushListText"></p>
+                </li>
+                <li class="posted_time">
+                    <h2 class="pushListHead">Time Posted</h2>
+                    <p class="pushListText"></p>
+                </li>
+            </ul>
+        </div>
+        
+
+      </ons-page>
+    </ons-template>
+    
+    
+    <ons-template id="dci.html">
+      <ons-page>
+      
+        <div class="cover">
+            
+        </div>
+      
+        <ons-toolbar>
+          <div class="left"><ons-back-button>Back</ons-back-button></div>
+          <div class="center">DCI Number Registration</div>
+        </ons-toolbar>
+
+        <div class="wrapper">
+            <p id="dciMessage">DCI Number is not registered.</p>
+            <input type="number" class="text-input" ng-model="text" placeholder="Input your DCI Number" style="display: block; width: 100%" id="dci">
+            <ons-button modifier="large" id="dciSubmit"><ons-ripple></ons-ripple>submit</ons-button>
+        </div>
+        
+      </ons-page>
+    </ons-template>
+
+    <ons-template id="test">
+      <ons-page>
+        <ons-toolbar>
+          <div class="center">Smart Pairing</div>
+        </ons-toolbar>
+        
+        <!-- 本文 -->
+        <div class="wrapper">
+            test
+        </div>
+      </ons-page>
+    </ons-template>
+
+
+</body>
+</html>
